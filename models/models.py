@@ -75,6 +75,7 @@ class McConsultasInstaladores(models.Model):
     lineas_facturas_ids = fields.Many2many('account.move.line', compute='_compute_lineas_factura', string='Líneas de Factura')
 
     def exportar_excel(self):
+        self.write({'estado': '2'})
         for record in self:
             # Crear un archivo Excel en memoria
             output = io.BytesIO()
@@ -148,8 +149,8 @@ class McConsultasInstaladores(models.Model):
                 record.update({'lineas_facturas_ids': [(5, 0, 0)]})
 
     #Funciones para cambiar el campo estado
-    def exportar_excel(self):
-        self.write({'estado': '2'})
+    # def exportar_excel(self):
+    #     self.write({'estado': '2'})
 
     def action_cancelar_consulta(self):
         self.write({'estado': '1'})
