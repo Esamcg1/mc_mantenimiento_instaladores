@@ -134,15 +134,29 @@ class McConsultasInstaladores(models.Model):
             }
 
 
+    # @api.depends('fecha_inicio', 'fecha_fin')
+    # def _compute_lineas_factura(self):
+    #     for record in self:
+    #         if record.fecha_inicio and record.fecha_fin:
+    #             # Obtener líneas de factura filtradas por las fechas
+    #             lineas = self.env['account.move.line'].search([
+    #                 ('move_id.invoice_date', '>=', record.fecha_inicio),
+    #                 ('move_id.invoice_date', '<=', record.fecha_fin),
+    #                 ('move_id.move_type', '=', 'out_invoice'),
+    #             ])
+    #             record.update({'lineas_facturas_ids': lineas})
+    #         else:
+    #             record.update({'lineas_facturas_ids': [(5, 0, 0)]})
     @api.depends('fecha_inicio', 'fecha_fin')
     def _compute_lineas_factura(self):
         for record in self:
             if record.fecha_inicio and record.fecha_fin:
-                # Obtener líneas de factura filtradas por las fechas
+                # Obtener líneas de factura filtradas por las fechas y productos de instalación
                 lineas = self.env['account.move.line'].search([
                     ('move_id.invoice_date', '>=', record.fecha_inicio),
                     ('move_id.invoice_date', '<=', record.fecha_fin),
                     ('move_id.move_type', '=', 'out_invoice'),
+                    ('product_id.product_tmpl_id.instalation_product', '=', True),  # Filtro para productos de instalación
                 ])
                 record.update({'lineas_facturas_ids': lineas})
             else:
