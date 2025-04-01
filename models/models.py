@@ -4,6 +4,34 @@ import io
 import xlsxwriter                                        #
 import base64
 from odoo import models, fields, api
+import string
+
+#Herencia al modelo sale.order y hacer el calculo de los dos tipos de productos
+class McSaleOrder(models.Model):
+    _inherit = 'sale.order'
+    _description = 'sale.order'
+
+    # Campos para el instalador
+    x_total_productos_instalacion = fields.Float(string="Total Productos Instalación", compute="_compute_totales_productos")
+    x_total_productos_no_instalacion = fields.Float(string="Total Productos No Instalación", compute="_compute_totales_productos")
+    x_total_productos = fields.Float(string="Total Productos", compute="_compute_totales_productos")
+
+    #logica para sumar los tipos de productos (instalacion y no instalacion)
+    @api.depends('order_line.product_id', 'order_line.price_subtotal')
+    def _compute_totales_productos(self):
+        for order in self:
+            total_instalacion = 0.0
+            total_no_instalacion = 0.0
+
+            for line in order.order_line:
+                if line.product_id.instalation_product:
+                    total_instalacion += line.price_subtotal
+                else:
+                    total_no_instalacion += line.price_subtotal
+
+            order.x_total_productos_instalacion = total_instalacion
+            order.x_total_productos_no_instalacion = total_no_instalacion
+            order.x_total_productos = total_instalacion + total_no_instalacion
 
 #Herencia para campos en los productos
 class mc_mantenimiento_instaladores(models.Model):
