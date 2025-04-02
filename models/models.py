@@ -17,22 +17,24 @@ class McSaleOrder(models.Model):
     x_total_productos = fields.Float(string="Total Productos", compute="_compute_totales_productos")
 
     #logica para sumar los tipos de productos (instalacion y no instalacion)
-    @api.depends('order_line.product_id', 'order_line.price_subtotal')
+    @api.depends('order_line.product_id', 'order_line.price_subtotal', 'order_line.price_tax')
     def _compute_totales_productos(self):
         for order in self:
             total_instalacion = 0.0
             total_no_instalacion = 0.0
 
             for line in order.order_line:
+                total_line = line.price_subtotal + line.price_tax  # Sumar impuestos al subtotal
+                
                 if line.product_id.instalation_product:
-                    total_instalacion += line.price_subtotal
+                    total_instalacion += total_line
                 else:
-                    total_no_instalacion += line.price_subtotal
+                    total_no_instalacion += total_line
 
             order.x_total_productos_instalacion = total_instalacion
             order.x_total_productos_no_instalacion = total_no_instalacion
             order.x_total_productos = total_instalacion + total_no_instalacion
-
+            
 #Herencia para campos en los productos
 class mc_mantenimiento_instaladores(models.Model):
     _inherit = 'product.template'
